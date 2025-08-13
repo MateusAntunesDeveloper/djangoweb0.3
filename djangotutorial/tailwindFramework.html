@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EncriptCripto - Cryptocurrency Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        crypto: {
+                            primary: '#6d28d9',
+                            secondary: '#8b5cf6',
+                            dark: '#0f172a',
+                            light: '#f8fafc',
+                            bitcoin: '#f7931a',
+                            ethereum: '#627eea',
+                            cardano: '#0033ad',
+                            solana: '#00ffbd',
+                            monero:'#00ffbd',
+                            success: '#10b981',
+                            danger: '#ef4444'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .crypto-gradient {
+            background: linear-gradient(135deg, rgb(0, 255, 200) 0%, rgba(0, 83, 177, 0.979) 100%);
+        }
+        .bitcoin-bg {
+            background-color: rgba(128, 105, 78, 0.1);
+            border-left: 4px solid #f7931a;
+        }
+        .ethereum-bg {
+            background-color: rgba(255, 21, 21, 0.815);
+            border-left: 4px solid #000000;
+        }
+        .price-up {
+            animation: pulseGreen 2s infinite;
+        }
+        .price-down {
+            animation: pulseRed 2s infinite;
+        }
+        @keyframes pulseGreen {
+            0% { background-color: rgba(0, 255, 170, 0.1); }
+            50% { background-color: rgb(0, 255, 170); }
+            100% { background-color: rgba(4, 255, 171, 0.1); }
+        }
+        @keyframes pulseRed {
+            0% { background-color: rgba(166, 255, 0, 0.1); }
+            50% { background-color: rgb(228, 138, 65); }
+            100% { background-color: rgba(15, 236, 52, 0.925); }
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(13, 206, 174, 0.1), 0 10px 10px -5px rgb(1, 255, 170);
+        }
+        .coin-logo {
+            width: 64px;
+            height: 24px;
+        }
+        .chart-container {
+            height: 300px;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: none;
+            }
+            .mobile-menu.active {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header/Navigation -->
+    <header class="crypto-gradient text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fab fa-bitcoin text-2xl"></i>
+                    <h1 class="text-2xl font-bold">Safe in Cripto</h1>
+                </div>
+                
+                <div class="hidden md:flex space-x-6">
+                    <a href="#" class="hover:text-purple-200 font-medium">Dashboard</a>
+                    <a href="#" class="hover:text-purple-200">Markets</a>
+                    <a href="#" class="hover:text-purple-200">Portfolio</a>
+                    <a href="#" class="hover:text-purple-200">Transactions</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button class="bg-white text-purple-700 px-4 py-2 rounded-full font-medium hover:bg-purple-100 transition">
+                        Connect Wallet
+                    </button>
+                    <button id="mobile-menu-button" class="md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="mobile-menu flex-col mt-4 space-y-3 pb-3">
+                <a href="#" class="hover:text-purple-200 font-medium">Dashboard</a>
+                <a href="#" class="hover:text-purple-200">Markets</a>
+                <a href="#" class="hover:text-purple-200">Portfolio</a>
+                <a href="#" class="hover:text-purple-200">Transactions</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Market Status Bar -->
+    <div class="bg-crypto-dark text-white py-2 px-4 flex overflow-x-auto space-x-6 text-sm">
+        <div class="flex items-center space-x-1 whitespace-nowrap">
+            <span class="text-green-400">▲</span>
+            <span>BTC: $42,856.12</span>
+            <span class="text-green-400">(+5.32%)</span>
+        </div>
+        <div class="flex items-center space-x-1 whitespace-nowrap">
+            <span class="text-green-400">▲</span>
+            <span>ETH: $2,345.67</span>
+            <span class="text-green-400">(+3.12%)</span>
+        </div>
+
+        <div class="flex items-center space-x-1 whitespace-nowrap">
+            <span class="text-red-400">▼</span>
+            <span>XMR : $313,23</span>
+            <span class="text-red-400">(-1.44%)</span>
+        </div>
+
+        <div class="flex items-center space-x-1 whitespace-nowrap">
+            <span class="text-red-400">▼</span>
+            <span>ADA>: $0.4567</span>
+            <span class="text-red-400">(-1.23%)</span>
+        </div>
+        <div class="flex items-center space-x-1 whitespace-nowrap">
+            <span class="text-green-400">▲</span>
+            <span>SOL: $98.76</span>
+            <span class="text-green-400">(+8.45%)</span>
+        </div>
+
+        <div class="flex items-center space-x-1 whitespace-nowrap">
+            <span>24h Vol: $142.5B</span>
+        </div>
+        <div class="flex items-center space-x-1 whitespace-nowrap">
+            <span>Dominance: BTC 48.2%</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Dashboard Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Portfolio Value -->
+            <div class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500">Portfolio Value</p>
+                        <h2 class="text-3xl font-bold mt-2">$24,568.42</h2>
+                        <p class="text-green-500 mt-1">+12.5% <span class="text-gray-500 text-sm">(24h)</span></p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-wallet text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Total Assets -->
+            <div class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500">Total Assets</p>
+                        <h2 class="text-3xl font-bold mt-2">9</h2>
+                        <p class="text-gray-500 mt-1 text-sm">Cryptocurrencies</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-coins text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Market Cap -->
+            <div class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500">Market Cap</p>
+                        <h2 class="text-3xl font-bold mt-2">$1.24T</h2>
+                        <p class="text-green-500 mt-1">+3.2% <span class="text-gray-500 text-sm">(24h)</span></p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-chart-line text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Market Data and Portfolio -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Market Data -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6 transition duration-300 card-hover">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold">Market Overview</h2>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">All</button>
+                            <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">Gainers</button>
+                            <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">Losers</button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">24h %</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Market Cap</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Bitcoin -->
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin" class="coin-logo">
+                                            <div class="ml-3">
+                                                <div class="font-medium">Bitcoin</div>
+                                                <div class="text-gray-500 text-sm">BTC</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        $42,856.12
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-green-500">
+                                        +5.32%
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        $820.4B
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <button class="text-purple-600 hover:text-purple-900">Trade</button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Ethereum -->
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="Ethereum" class="coin-logo">
+                                            <div class="ml-3">
+                                                <div class="font-medium">Ethereum</div>
+                                                <div class="text-gray-500 text-sm">ETH</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        $2,345.67
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-green-500">
+                                        +3.12%
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        $281.7B
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <button class="text-purple-600 hover:text-purple-900">Trade</button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Cardano -->
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img src="https://cryptologos.cc/logos/cardano-ada-logo.png" alt="Cardano" class="coin-logo">
+                                            <div class="ml-3">
+                                                <div class="font-medium">Cardano</div>
+                                                <div class="text-gray-500 text-sm">ADA</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        $0.4567
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-red-500">
+                                        -1.23%
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        $15.8B
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <button class="text-purple-600 hover:text-purple-900">Trade</button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Solana -->
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana" class="coin-logo">
+                                            <div class="ml-3">
+                                                <div class="font-medium">Solana</div>
+                                                <div class="text-gray-500 text-sm">SOL</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        $98.76
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-green-500">
+                                        +8.45%
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        $41.2B
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <button class="text-purple-600 hover:text-purple-900">Trade</button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Monero" class="coin-logo">
+                                            <div class="ml-3">
+                                                <div class="font-medium">Monero</div>
+                                                <div class="text-gray-500 text-sm">XMR</div>
+
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py py-4 whitespace-nowrap">
+                                        $311,49
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-red-500">
+                                        -0,17%
+                                    </td>
+                                      <td class="px-6 py-4 whitespace-nowrap">
+                                        $73.1B
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <button class="text-purple-600 hover:text-purple-900">Trade</button>
+                                    </td>
+                                    
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <button class="text-purple-600 font-medium hover:text-purple-800">
+                            View All Assets <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Price Chart -->
+                <div class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center space-x-4">
+                            <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin" class="coin-logo">
+                            <h2 class="text-xl font-bold">BTC/USDT</h2>
+                            <span class="text-green-500">+5.32%</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">1D</button>
+                            <button class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">1W</button>
+                            <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">1M</button>
+                            <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">1Y</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <!-- This would be replaced with an actual chart library like Chart.js in a real implementation -->
+                        <div class="bg-gray-100 rounded-lg h-full flex items-center justify-center">
+                            <p class="text-gray-500">Price Chart Visualization</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Portfolio and Quick Trade -->
+            <div class="lg:col-span-1">
+                <!-- Portfolio Summary -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6 transition duration-300 card-hover">
+                    <h2 class="text-xl font-bold mb-6">Your Portfolio</h2>
+                    
+                    <div class="space-y-4">
+                        <!-- Bitcoin -->
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-3">
+                                <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin" class="coin-logo">
+                                <div>
+                                    <p class="font-medium">Bitcoin</p>
+                                    <p class="text-gray-500 text-sm">0.42 BTC</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-medium">$18,000.42</p>
+                                <p class="text-green-500 text-sm">+12.5%</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Ethereum -->
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-3">
+                                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="Ethereum" class="coin-logo">
+                                <div>
+                                    <p class="font-medium">Ethereum</p>
+                                    <p class="text-gray-500 text-sm">3.2 ETH</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-medium">$7,506.14</p>
+                                <p class="text-green-500 text-sm">+8.2%</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Cardano -->
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-3">
+                                <img src="https://cryptologos.cc/logos/cardano-ada-logo.png" alt="Cardano" class="coin-logo">
+                                <div>
+                                    <p class="font-medium">Cardano</p>
+                                    <p class="text-gray-500 text-sm">1,200 ADA</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-medium">$548.04</p>
+                                <p class="text-red-500 text-sm">-2.3%</p>
+                            </div>
+                        </div>
+                        
+
+
+
+                        <!-- View All -->
+                        <div class="pt-4 border-t border-gray-200">
+                            <button class="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                                View Full Portfolio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Trade -->
+                <div class="bg-white rounded-xl shadow-md p-6 transition duration-300 card-hover">
+                    <h2 class="text-xl font-bold mb-6">Quick Trade</h2>
+                    
+                    <div class="space-y-4">
+                        <!-- Asset Selection -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Asset</label>
+                            <div class="relative">
+                                <select class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                                    <option>Bitcoin (BTC)</option>
+                                    <option>Ethereum (ETH)</option>
+                                    <option>Cardano (ADA)</option>
+                                    <option>Solana (SOL)</option>
+                                    <option>Monero (XMR)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Trade Type -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Trade Type</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="py-2 bg-green-100 text-green-700 rounded-lg font-medium">Buy</button>
+                                <button class="py-2 bg-red-100 text-red-700 rounded-lg font-medium">Sell</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Amount -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                            <div class="relative">
+                                <input type="text" class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500" placeholder="0.00">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span class="text-gray-500">BTC</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Price -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                            <div class="relative">
+                                <input type="text" class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500" placeholder="0.00">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span class="text-gray-500">USD</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Total -->
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">Total</span>
+                                <span class="font-medium">$0.00</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <button class="w-full py-3 gradient-bg text-white rounded-lg hover:opacity-90 transition font-medium">
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fab fa-bitcoin text-2xl"></i>
+                        <h3 class="text-xl font-bold">CriptoSistem</h3>
+                    </div>
+                    <p class="text-gray-400">The most trusted cryptocurrency platform for trading and investing.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Products</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Exchange</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Wallet</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Staking</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">API</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Community</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Status</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">About</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Careers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Legal</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2025 CriptoSistem. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-telegram"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-discord"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('active');
+        });
+        
+        // Simulate price updates (in a real app, this would come from an API)
+        function simulatePriceUpdates() {
+            const priceElements = document.querySelectorAll('tbody tr td:nth-child(2)');
+            const changeElements = document.querySelectorAll('tbody tr td:nth-child(3)');
+            
+            priceElements.forEach((el, index) => {
+                const currentPrice = parseFloat(el.textContent.replace('$', '').replace(',', ''));
+                const changePercent = parseFloat(changeElements[index].textContent.replace('%', ''));
+                
+                // Small random fluctuation
+                const fluctuation = (Math.random() - 0.5) * 0.2;
+                const newChange = changePercent + fluctuation;
+                const newPrice = currentPrice * (1 + (newChange / 100));
+                
+                el.textContent = '$' + newPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                
+                if (newChange >= 0) {
+                    changeElements[index].className = 'px-6 py-4 whitespace-nowrap text-green-500';
+                    changeElements[index].textContent = '+' + newChange.toFixed(2) + '%';
+                } else {
+                    changeElements[index].className = 'px-6 py-4 whitespace-nowrap text-red-500';
+                    changeElements[index].textContent = newChange.toFixed(2) + '%';
+                }
+            });
+        }
+        
+        // Update prices every 5 seconds
+        setInterval(simulatePriceUpdates, 5000);
+    </script>
+</body>
+</html>

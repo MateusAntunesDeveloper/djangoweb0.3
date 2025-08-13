@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        
+        .defective-item {
+            position: relative;
+        }
+        .defective-item::after {
+            content: "DEFECTIVE";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 0 0.375rem 0 0.375rem;
+        }
+        .in-use-item {
+            position: relative;
+        }
+        .in-use-item::after {
+            content: "IN USE";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #3b82f6;
+            color: white;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 0 0.375rem 0 0.375rem;
+        }
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Stock Management System</h1>
+            <p class="text-gray-600">Track, manage, and monitor your inventory</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Add Item Form -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Add New Item</h2>
+                <form id="addItemForm" class="space-y-4">
+                    <div>
+                        <label for="itemName" class="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+                        <input type="text" id="itemName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label for="itemQuantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input type="number" id="itemQuantity" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label for="itemCategory" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <select id="itemCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="Electronics">Electronics</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Office Supplies">Office Supplies</option>
+                            <option value="Tools">Tools</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-plus-circle mr-2"></i> Add to Stock
+                    </button>
+                </form>
+            </div>
+
+            <!-- Stock Summary -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Stock Summary</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="text-sm text-blue-600 font-medium">Total Items</p>
+                        <p id="totalItems" class="text-2xl font-bold text-blue-800">0</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <p class="text-sm text-green-600 font-medium">Available</p>
+                        <p id="availableItems" class="text-2xl font-bold text-green-800">0</p>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <p class="text-sm text-red-600 font-medium">Defective</p>
+                        <p id="defectiveItems" class="text-2xl font-bold text-red-800">0</p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <p class="text-sm text-yellow-600 font-medium">In Use</p>
+                        <p id="inUseItems" class="text-2xl font-bold text-yellow-800">0</p>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Quick Actions</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="checkDefectiveBtn" class="bg-red-100 text-red-700 px-3 py-1 rounded-md text-sm hover:bg-red-200 transition">
+                            <i class="fas fa-times-circle mr-1"></i> Mark Defective
+                        </button>
+                        <button id="checkInUseBtn" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm hover:bg-blue-200 transition">
+                            <i class="fas fa-clock mr-1"></i> Mark In Use
+                        </button>
+                        <button id="returnToStockBtn" class="bg-green-100 text-green-700 px-3 py-1 rounded-md text-sm hover:bg-green-200 transition">
+                            <i class="fas fa-undo mr-1"></i> Return to Stock
+                        </button>
+                        <button id="removeItemBtn" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-200 transition">
+                            <i class="fas fa-trash-alt mr-1"></i> Remove Item
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Search & Filter</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="searchItem" class="block text-sm font-medium text-gray-700 mb-1">Search Items</label>
+                        <div class="relative">
+                            <input type="text" id="searchItem" placeholder="Search by name..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-search absolute right-3 top-2.5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="filterStatus" class="block text-sm font-medium text-gray-700 mb-1">Filter by Status</label>
+                        <select id="filterStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">All Items</option>
+                            <option value="available">Available</option>
+                            <option value="defective">Defective</option>
+                            <option value="inUse">In Use</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filterCategory" class="block text-sm font-medium text-gray-700 mb-1">Filter by Category</label>
+                        <select id="filterCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">All Categories</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Office Supplies">Office Supplies</option>
+                            <option value="Tools">Tools</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Items Table -->
+        <div class="bg-white rounded-lg shadow mt-6 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-gray-800">Inventory Items</h2>
+                <div class="text-sm text-gray-500">
+                    <span id="filteredCount">0</span> items shown
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <input type="checkbox" id="selectAll" class="rounded text-blue-600 focus:ring-blue-500">
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockItems" class="bg-white divide-y divide-gray-200">
+                        <!-- Items will be added here dynamically -->
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">No items in stock yet. Add some items to get started.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- In Use Modal -->
+    <div id="inUseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal modal-hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Mark Item as In Use</h3>
+                <button id="closeInUseModal" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="inUseDuration" class="block text-sm font-medium text-gray-700 mb-1">Duration (hours)</label>
+                    <input type="number" id="inUseDuration" min="1" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="inUseNotes" class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
+                    <textarea id="inUseNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button id="cancelInUse" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button id="confirmInUse" class="px-4 py-2 bg-blue-600 rounded-md text-sm font-medium text-white hover:bg-blue-700">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Defective Modal -->
+    <div id="defectiveModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal modal-hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Mark Item as Defective</h3>
+                <button id="closeDefectiveModal" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="defectiveReason" class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                    <select id="defectiveReason" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Damaged">Damaged</option>
+                        <option value="Faulty">Faulty</option>
+                        <option value="Expired">Expired</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="defectiveNotes" class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
+                    <textarea id="defectiveNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button id="cancelDefective" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button id="confirmDefective" class="px-4 py-2 bg-red-600 rounded-md text-sm font-medium text-white hover:bg-red-700">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Stock data
+        let stockItems = JSON.parse(localStorage.getItem('stockItems')) || [];
+        let selectedItems = [];
+        let inUseTimers = {};
+
+        // DOM elements
+        const addItemForm = document.getElementById('addItemForm');
+        const stockItemsTable = document.getElementById('stockItems');
+        const totalItemsEl = document.getElementById('totalItems');
+        const availableItemsEl = document.getElementById('availableItems');
+        const defectiveItemsEl = document.getElementById('defectiveItems');
+        const inUseItemsEl = document.getElementById('inUseItems');
+        const filteredCountEl = document.getElementById('filteredCount');
+        const searchItem = document.getElementById('searchItem');
+        const filterStatus = document.getElementById('filterStatus');
+        const filterCategory = document.getElementById('filterCategory');
+        const selectAll = document.getElementById('selectAll');
+        const checkDefectiveBtn = document.getElementById('checkDefectiveBtn');
+        const checkInUseBtn = document.getElementById('checkInUseBtn');
+        const returnToStockBtn = document.getElementById('returnToStockBtn');
+        const removeItemBtn = document.getElementById('removeItemBtn');
+
+        // Modal elements
+        const inUseModal = document.getElementById('inUseModal');
+        const closeInUseModal = document.getElementById('closeInUseModal');
+        const cancelInUse = document.getElementById('cancelInUse');
+        const confirmInUse = document.getElementById('confirmInUse');
+        const inUseDuration = document.getElementById('inUseDuration');
+        const inUseNotes = document.getElementById('inUseNotes');
+
+        const defectiveModal = document.getElementById('defectiveModal');
+        const closeDefectiveModal = document.getElementById('closeDefectiveModal');
+        const cancelDefective = document.getElementById('cancelDefective');
+        const confirmDefective = document.getElementById('confirmDefective');
+        const defectiveReason = document.getElementById('defectiveReason');
+        const defectiveNotes = document.getElementById('defectiveNotes');
+
+        // Initialize the app
+        function init() {
+            renderStockItems();
+            updateSummary();
+            setupEventListeners();
+            checkInUseItems();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Form submission
+            addItemForm.addEventListener('submit', handleAddItem);
+
+            // Search and filter
+            searchItem.addEventListener('input', renderStockItems);
+            filterStatus.addEventListener('change', renderStockItems);
+            filterCategory.addEventListener('change', renderStockItems);
+
+            // Select all checkbox
+            selectAll.addEventListener('change', toggleSelectAll);
+
+            // Action buttons
+            checkDefectiveBtn.addEventListener('click', openDefectiveModal);
+            checkInUseBtn.addEventListener('click', openInUseModal);
+            returnToStockBtn.addEventListener('click', returnItemsToStock);
+            removeItemBtn.addEventListener('click', removeSelectedItems);
+
+            // Modal events
+            closeInUseModal.addEventListener('click', closeModal.bind(null, inUseModal));
+            cancelInUse.addEventListener('click', closeModal.bind(null, inUseModal));
+            confirmInUse.addEventListener('click', markItemsAsInUse);
+
+            closeDefectiveModal.addEventListener('click', closeModal.bind(null, defectiveModal));
+            cancelDefective.addEventListener('click', closeModal.bind(null, defectiveModal));
+            confirmDefective.addEventListener('click', markItemsAsDefective);
+        }
+
+        // Handle adding new item
+        function handleAddItem(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('itemName').value.trim();
+            const quantity = parseInt(document.getElementById('itemQuantity').value);
+            const category = document.getElementById('itemCategory').value;
+            
+            if (!name || isNaN(quantity) || quantity <= 0) return;
+            
+            const newItem = {
+                id: Date.now().toString(),
+                name,
+                quantity,
+                category,
+                status: 'available',
+                lastUpdated: new Date().toISOString(),
+                history: []
+            };
+            
+            stockItems.push(newItem);
+            saveStockItems();
+            renderStockItems();
+            updateSummary();
+            
+            // Reset form
+            addItemForm.reset();
+            document.getElementById('itemName').focus();
+        }
+
+        // Render stock items based on filters
+        function renderStockItems() {
+            const searchTerm = searchItem.value.toLowerCase();
+            const statusFilter = filterStatus.value;
+            const categoryFilter = filterCategory.value;
+            
+            let filteredItems = stockItems.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm);
+                const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
+                const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
+                return matchesSearch && matchesStatus && matchesCategory;
+            });
+            
+            filteredCountEl.textContent = filteredItems.length;
+            
+            if (filteredItems.length === 0) {
+                stockItemsTable.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No items match your search criteria.</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            filteredItems.forEach(item => {
+                const isSelected = selectedItems.includes(item.id);
+                const statusClass = item.status === 'defective' ? 'bg-red-100 text-red-800' : 
+                                  item.status === 'inUse' ? 'bg-blue-100 text-blue-800' : 
+                                  'bg-green-100 text-green-800';
+                
+                const lastUpdated = new Date(item.lastUpdated).toLocaleString();
+                
+                html += `
+                    <tr class="${item.status === 'defective' ? 'defective-item' : ''} ${item.status === 'inUse' ? 'in-use-item' : ''}" data-id="${item.id}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <input type="checkbox" class="item-checkbox rounded text-blue-600 focus:ring-blue-500" ${isSelected ? 'checked' : ''}>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${item.name}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-500">${item.category}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${item.quantity}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                                ${item.status === 'defective' ? 'Defective' : 
+                                 item.status === 'inUse' ? 'In Use' : 'Available'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${lastUpdated}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="text-blue-600 hover:text-blue-900 mr-3 item-action" data-action="use">
+                                <i class="fas fa-clock"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-900 mr-3 item-action" data-action="defective">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
+                            <button class="text-green-600 hover:text-green-900 item-action" data-action="return">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            stockItemsTable.innerHTML = html;
+            
+            // Add event listeners to checkboxes
+            document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', handleItemSelection);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.item-action').forEach(button => {
+                button.addEventListener('click', handleItemAction);
+            });
+        }
+
+        // Handle item selection
+        function handleItemSelection(e) {
+            const itemId = e.target.closest('tr').dataset.id;
+            
+            if (e.target.checked) {
+                if (!selectedItems.includes(itemId)) {
+                    selectedItems.push(itemId);
+                }
+            } else {
+                selectedItems = selectedItems.filter(id => id !== itemId);
+                selectAll.checked = false;
+            }
+            
+            updateActionButtons();
+        }
+
+        // Toggle select all items
+        function toggleSelectAll(e) {
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            
+            if (e.target.checked) {
+                selectedItems = [];
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                    const itemId = checkbox.closest('tr').dataset.id;
+                    if (!selectedItems.includes(itemId)) {
+                        selectedItems.push(itemId);
+                    }
+                });
+            } else {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                selectedItems = [];
+            }
+            
+            updateActionButtons();
+        }
+
+        // Handle item action buttons
+        function handleItemAction(e) {
+            const action = e.target.closest('button').dataset.action;
+            const itemId = e.target.closest('tr').dataset.id;
+            
+            selectedItems = [itemId];
+            
+            switch (action) {
+                case 'use':
+                    openInUseModal();
+                    break;
+                case 'defective':
+                    openDefectiveModal();
+                    break;
+                case 'return':
+                    returnItemsToStock();
+                    break;
+            }
+        }
+
+        // Update action buttons based on selection
+        function updateActionButtons() {
+            const hasSelection = selectedItems.length > 0;
+            
+            checkDefectiveBtn.disabled = !hasSelection;
+            checkInUseBtn.disabled = !hasSelection;
+            returnToStockBtn.disabled = !hasSelection;
+            removeItemBtn.disabled = !hasSelection;
+        }
+
+        // Open in use modal
+        function openInUseModal() {
+            inUseModal.classList.remove('modal-hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Open defective modal
+        function openDefectiveModal() {
+            defectiveModal.classList.remove('modal-hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close modal
+        function closeModal(modal) {
+            modal.classList.add('modal-hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Mark selected items as in use
+        function markItemsAsInUse() {
+            const duration = parseInt(inUseDuration.value) || 1;
+            const notes = inUseNotes.value.trim();
+            
+            const now = new Date();
+            const returnTime = new Date(now.getTime() + duration * 60 * 60 * 1000);
+            
+            selectedItems.forEach(itemId => {
+                const item = stockItems.find(item => item.id === itemId);
+                if (item && item.status === 'available') {
+                    item.status = 'inUse';
+                    item.lastUpdated = now.toISOString();
+                    
+                    // Add to history
+                    item.history.push({
+                        action: 'marked_in_use',
+                        timestamp: now.toISOString(),
+                        duration: duration,
+                        notes: notes,
+                        returnTime: returnTime.toISOString()
+                    });
+                    
+                    // Set timer to automatically return to stock
+                    const timerId = setTimeout(() => {
+                        returnItemToStock(itemId);
+                    }, duration * 60 * 60 * 1000);
+                    
+                    inUseTimers[itemId] = timerId;
+                }
+            });
+            
+            saveStockItems();
+            renderStockItems();
+            updateSummary();
+            closeModal(inUseModal);
+            
+            // Reset modal fields
+            inUseDuration.value = '1';
+            inUseNotes.value = '';
+            selectedItems = [];
+        }
+
+        // Mark selected items as defective
+        function markItemsAsDefective() {
+            const reason = defectiveReason.value;
+            const notes = defectiveNotes.value.trim();
+            const now = new Date();
+            
+            selectedItems.forEach(itemId => {
+                const item = stockItems.find(item => item.id === itemId);
+                if (item) {
+                    item.status = 'defective';
+                    item.lastUpdated = now.toISOString();
+                    
+                    // Add to history
+                    item.history.push({
+                        action: 'marked_defective',
+                        timestamp: now.toISOString(),
+                        reason: reason,
+                        notes: notes
+                    });
+                }
+            });
+            
+            saveStockItems();
+            renderStockItems();
+            updateSummary();
+            closeModal(defectiveModal);
+            
+            // Reset modal fields
+            defectiveReason.value = 'Damaged';
+            defectiveNotes.value = '';
+            selectedItems = [];
+        }
+
+        // Return selected items to stock
+        function returnItemsToStock() {
+            const now = new Date();
+            
+            selectedItems.forEach(itemId => {
+                const item = stockItems.find(item => item.id === itemId);
+                if (item && item.status === 'inUse') {
+                    item.status = 'available';
+                    item.lastUpdated = now.toISOString();
+                    
+                    // Add to history
+                    item.history.push({
+                        action: 'returned_to_stock',
+                        timestamp: now.toISOString()
+                    });
+                    
+                    // Clear timer if exists
+                    if (inUseTimers[itemId]) {
+                        clearTimeout(inUseTimers[itemId]);
+                        delete inUseTimers[itemId];
+                    }
+                }
+            });
+            
+            saveStockItems();
+            renderStockItems();
+            updateSummary();
+            selectedItems = [];
+        }
+
+        // Return single item to stock (used by timer)
+        function returnItemToStock(itemId) {
+            const item = stockItems.find(item => item.id === itemId);
+            if (item && item.status === 'inUse') {
+                const now = new Date();
+                item.status = 'available';
+                item.lastUpdated = now.toISOString();
+                
+                // Add to history
+                item.history.push({
+                    action: 'auto_returned_to_stock',
+                    timestamp: now.toISOString()
+                });
+                
+                delete inUseTimers[itemId];
+                saveStockItems();
+                renderStockItems();
+                updateSummary();
+            }
+        }
+
+        // Remove selected items from stock
+        function removeSelectedItems() {
+            if (confirm('Are you sure you want to remove the selected items?')) {
+                stockItems = stockItems.filter(item => !selectedItems.includes(item.id));
+                
+                // Clear any timers for removed items
+                selectedItems.forEach(itemId => {
+                    if (inUseTimers[itemId]) {
+                        clearTimeout(inUseTimers[itemId]);
+                        delete inUseTimers[itemId];
+                    }
+                });
+                
+                saveStockItems();
+                renderStockItems();
+                updateSummary();
+                selectedItems = [];
+            }
+        }
+
+        // Check in-use items and return any that have expired
+        function checkInUseItems() {
+            const now = new Date();
+            
+            stockItems.forEach(item => {
+                if (item.status === 'inUse') {
+                    const lastInUseEntry = item.history
+                        .filter(entry => entry.action === 'marked_in_use')
+                        .pop();
+                    
+                    if (lastInUseEntry && new Date(lastInUseEntry.returnTime) <= now) {
+                        returnItemToStock(item.id);
+                    }
+                }
+            });
+        }
+
+        // Update summary counts
+        function updateSummary() {
+            const total = stockItems.length;
+            const available = stockItems.filter(item => item.status === 'available').length;
+            const defective = stockItems.filter(item => item.status === 'defective').length;
+            const inUse = stockItems.filter(item => item.status === 'inUse').length;
+            
+            totalItemsEl.textContent = total;
+            availableItemsEl.textContent = available;
+            defectiveItemsEl.textContent = defective;
+            inUseItemsEl.textContent = inUse;
+        }
+
+        // Save stock items to localStorage
+        function saveStockItems() {
+            localStorage.setItem('stockItems', JSON.stringify(stockItems));
+        }
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
